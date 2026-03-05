@@ -45,13 +45,13 @@ def handle_connect():
 def handle_key(data, m = 1):
     print(motion)
     if data == 'w':
-        motion['speed'] = -0.75 * m
+        motion['speed'] = 100 * m
     if data == 's':
-        motion['speed'] = 0.75 * m
+        motion['speed'] = -100 * m
     if data == 'a':
-        motion['turn'] = -1 * m
-    if data == 'd':
         motion['turn'] = 1 * m
+    if data == 'd':
+        motion['turn'] = -1 * m
     print(motion)
     move.set_motion(movement=motion)
 

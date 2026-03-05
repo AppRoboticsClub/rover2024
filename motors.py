@@ -35,11 +35,16 @@ isReversed = False
 def turn(value): 
     motorLServo.ChangeDutyCycle(speed * (1 + value)) # 50 Right, 0 Neutral, -50 Left
     motorRServo.ChangeDutyCycle(speed * (1 - value))
+#    motorLServo.ChangeDutyCycle((1 + value)) # 50 Right, 0 Neutral, -50 Left
+#    motorRServo.ChangeDutyCycle((1 - value))
     dutyL = 50 + value
     dutyR = 50 - value
     
 def acc(value):
     global isReversed
+    print("VALUE")
+    print(value)
+    value = value / 5
     if value < 0:
         setReverse(True)
     else:
@@ -60,6 +65,9 @@ def acc(value):
     # update the speed
     global speed
     speed = value
+
+    print("Speed : " + str(speed))
+    print("Speed : " + str(value))
 
 def stop():
     motorLServo.stop()
@@ -84,8 +92,10 @@ def setReverse(isRev: bool):
     - @param isRev: bool - The current state of the reverse button
     '''
     global isReversed
-    if isReversed == isRev:
-        return
+#    if isReversed == isRev:
+#        return
     isReversed = isRev
     GPIO.output(pinReverseL, isRev)
-    GPIO.output(pinReverseR, isRev)
+    GPIO.output(pinReverseR, not isRev)
+    print("REVERSED")
+    print(isRev)
