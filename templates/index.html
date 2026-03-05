@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="icon" href="{{ url_for('static', filename='assets/favicon.png') }}" type="image/png">
+	<title>App Rover</title>
+	<!-- Get the SocketIO javascript data from the file downloaded from:
+	 https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js -->
+	<script type="text/javascript" src="{{ url_for('static', filename='cloudflare.com.socket.io.js') }}"></script>
+	<script type="text/javascript">
+		// Enable the SocketIO js script,
+		var socket = io();
+		//   and tell it to listen for key presses and releases,
+		//   so that it can send that info to Flask.
+		document.onkeydown = function (e) {
+			socket.emit('key-down', e.key);
+		}
+		document.onkeyup = function (e) {
+			socket.emit('key-up', e.key);
+		}
+	</script>
+</head>
+
+<body>
+	<center>
+		<canvas id="myCanvas" width="480" height="360" style="border:1px solid #000000;">
+		</canvas>
+	</center>
+</body>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='roversim.js') }}"></script> -->
+
+</html>
