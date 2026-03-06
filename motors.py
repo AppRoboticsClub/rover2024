@@ -9,6 +9,7 @@ pinMotorR = 12 # GPIO Pin for motorR # previously motor2
 pinReverseL = 5 # pin for reverse left
 pinReverseR = 6 # pin for reverse right
 
+
 # setup
 # motor control pins
 GPIO.setup(pinMotorL, GPIO.OUT) # set pin motorL to output
@@ -31,20 +32,23 @@ dutyR = 5
 
 isReversed = False
 
-def turn(value): 
+def turn(value):
     motorLServo.ChangeDutyCycle(speed * (1 + value)) # 50 Right, 0 Neutral, -50 Left
     motorRServo.ChangeDutyCycle(speed * (1 - value))
+#    motorLServo.ChangeDutyCycle((1 + value)) # 50 Right, 0 Neutral, -50 Left
+#    motorRServo.ChangeDutyCycle((1 - value))
     dutyL = 50 + value
     dutyR = 50 - value
-    
+
 def acc(value):
     global isReversed
+    value = value / 5
     if value < 0:
         setReverse(True)
     else:
         setReverse(False)
     # check for is reversed
-    
+
     # reduce reverse speed
     if isReversed:
         value = value * -1
@@ -63,15 +67,15 @@ def acc(value):
 def stop():
     motorLServo.stop()
     motorRServo.stop()
-    
+
 def start():
     motorLServo.start(dutyL)
     motorRServo.start(dutyR)
-    
+
 def Left(value: int):
-    # motorLServo.ChangeFrequence(value)
-    motorLServo.ChangeFrequency(value)
-    
+    motorLServo.ChangeFrequence(value)
+    # motorLServo.ChangeFrequency(value)
+
 def Right(value: int):
     # motorRServo.ChangeFrequence(value)
     motorRServo.ChangeFrequency(value)
@@ -83,8 +87,9 @@ def setReverse(isRev: bool):
     - @param isRev: bool - The current state of the reverse button
     '''
     global isReversed
-    if isReversed == isRev:
-        return
+#    if isReversed == isRev:
+#        return
     isReversed = isRev
     GPIO.output(pinReverseL, isRev)
-    GPIO.output(pinReverseR, isRev)
+    GPIO.output(pinReverseR, not isRev)
+
