@@ -17,7 +17,7 @@ The following is a full tree of the files in this repository, followed by subtre
 ```
 
 ### `main.py`
-The `main.py` Python script runs the Flask webapp and listens for key presses while connected to that website. On certain key pressed ('w', 'a', 's', and 'd'), calls the appropriate movement function imported from `motors.py`
+The `main.py` Python script runs the Flask webapp and listens for key presses while a user is connected to that website. On certain key presses ('w', 'a', 's', and 'd'), this script calls the appropriate movement function imported from `motors.py`.
 
 ### `motors.py`
 The `motors.py` Python script handles all RPi GPIO, controlling the motors and handling the rover's movement.
@@ -39,9 +39,12 @@ The `/templates` directory is where Flask will look to find anything referenced 
 ### `/oldversion`
 The `/oldversion` directory contains code from the previous implementations that ran the rover.
 
+
+
 ## Setup
 
 > Recomended: Use a python virtual enviroment for installing dependencies.
+
 `python -m .venv venv`
 `source .venv/bin/activate` (for Linux/Mac)
 `.venv/Scripts/activate.bat` (for Windows - cmd)
