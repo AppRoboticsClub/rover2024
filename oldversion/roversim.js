@@ -3,15 +3,16 @@ var ctx = canvas.getContext("2d");
 
 let width = canvas.width;
 let height = canvas.height;
-let posx = width / 2;
-let posy = height / 2;
+let posx = 0;
+let posy = 0;
 let rotation = 0;
 
 let speed = 0;
 let turn = 0;
 
 let backgroundImage = new Image();
-backgroundImage.src = "/assets/IMG_0016.jpg";
+//backgroundImage.src = "/assets/IMG_0016.jpg";
+backgroundImage.src = "/assets/tile.jpg";
 
 socket.on('set-speed', function (data) {
 	speed = data["speed"];
@@ -27,7 +28,7 @@ function clear() {
 
 function drawRover() {
 	ctx.save();
-	ctx.translate(posx, posy);
+	ctx.translate(width / 2, height / 2);
 	ctx.rotate(rotation * Math.PI / 180);
 
 	ctx.beginPath();
@@ -47,12 +48,23 @@ function drawRover() {
 }
 
 function drawBackground() {
-	ctx.drawImage(backgroundImage, 0, 0, width, height); // Draw image at (0,0) with canvas dimensions
-  }
+	//ctx.drawImage(backgroundImage, 0, 0, width, height); // Draw image at (0,0) with canvas dimensions
+	ctx.drawImage(backgroundImage, 2048 + posx, 2048 + posy, 2048, 2048, 0, 0, width, height);
+}
 
 function redraw() {
 	drawBackground()
 	drawRover();
+}
+
+function sanitizeCoord(coord) {
+	if(coord <= -2048) {
+		coord += 2048;
+	} else if(coord >= 2048) {
+		coord -= 2048;
+	}
+	
+	return coord;
 }
 
 function roversim() {
@@ -60,7 +72,9 @@ function roversim() {
 	if (rotation > 180) rotation -= 360;
 	else if (rotation < -180) rotation += 360;
 	posy += speed * Math.cos((Math.PI / 180) * rotation * -1);
+	posy = sanitizeCoord(posy);
 	posx += speed * Math.sin((Math.PI / 180) * rotation * -1);
+	posx = sanitizeCoord(posx);
 	redraw();
 	setTimeout(roversim, 10);
 }
