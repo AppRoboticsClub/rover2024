@@ -35,7 +35,7 @@ class Motor:
         self._reverse = reverse
 
         if setup:
-            self.setup()
+            self._setup()
 
     def stop(self):
         self._motor_servo.stop()
