@@ -10,8 +10,8 @@ pinMotorR = 12 # GPIO Pin for motorR # previously motor2
 pinReverseL = 5 # pin for reverse left
 pinReverseR = 6 # pin for reverse right
 
-forwardDC = 75
-backwardDC = 30
+forwardDC = 50
+backwardDC = 40
 turnStillDC = 50
 
 class Motor:
@@ -108,7 +108,7 @@ def move(straight, turn):
             motorL.reverse = straight == -1
             motorR.reverse = straight == -1
 
-            dc = reverseDC if motorL.reverse else forwardDC
+            dc = backwardDC if motorL.reverse else forwardDC
             motorL.dc = dc
             motorR.dc = dc
         case _: # Turning while moving
