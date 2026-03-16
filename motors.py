@@ -10,9 +10,9 @@ pinMotorR = 12 # GPIO Pin for motorR # previously motor2
 pinReverseL = 5 # pin for reverse left
 pinReverseR = 6 # pin for reverse right
 
-forwardDC = 50
-backwardDC = 40
-turnStillDC = 50
+forwardDC = 20
+backwardDC = 15
+turnStillDC = 20
 
 class Motor:
     def _setup(self):
