@@ -22,7 +22,7 @@ class Motor:
 
         GPIO.output(self._reverse_pin, self._reverse)
 
-        self._motor_servo = GPIO.PWM(motor_pin, starting_freq)
+        self._motor_servo = GPIO.PWM(self._motor_pin, starting_freq)
         self._motor_servo.start(self._dc)
         self._running = True
         self._motor_servo.ChangeDutyCycle(self._dc)
