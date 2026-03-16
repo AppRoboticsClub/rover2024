@@ -33,12 +33,28 @@ dutyR = 5
 isReversed = False
 
 def turn(value):
-    motorLServo.ChangeDutyCycle(speed * (1 + value)) # 50 Right, 0 Neutral, -50 Left
-    motorRServo.ChangeDutyCycle(speed * (1 - value))
-#    motorLServo.ChangeDutyCycle((1 + value)) # 50 Right, 0 Neutral, -50 Left
-#    motorRServo.ChangeDutyCycle((1 - value))
+    if value < 0:
+        GPIO.output(pinReverseL, True)
+        GPIO.output(pinReverseR, True)
+    elif value > 0:
+        GPIO.output(pinReverseL, False)
+        GPIO.output(pinReverseR, False)
+
+    l_speed = speed * (1 + value)
+    r_speed = speed * (1 - value)
+
+    motorLServo.ChangeDutyCycle(speed) # 50 Right, 0 Neutral, -50 Left
+    motorRServo.ChangeDutyCycle(speed)
+
+    print(f"Turning: {l_speed} -- {r_speed} (speed={speed})(value={value})")
+
     dutyL = 50 + value
     dutyR = 50 - value
+
+    if speed < 0:
+        setReverse(True)
+    else:
+        setReverse(False)
 
 def acc(value):
     global isReversed
@@ -55,6 +71,7 @@ def acc(value):
         value = value / 5
 
     # update pwm duty cycle to new value
+    print(f"Changing acc() duty cycle: {value}")
     motorLServo.ChangeDutyCycle(value)
     motorRServo.ChangeDutyCycle(value)
     dutyL = value

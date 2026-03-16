@@ -39,10 +39,14 @@ Handle any key being pressed
 def handle_key(data, m = 1):
     prev = motion.copy()
     match data:
-        case 'w': motion['speed'] = 100 * m
-        case 'a': motion['turn']  = 1 * m
-        case 's': motion['speed'] = -100 * m
-        case 'd': motion['turn']  = -1 * m
+        case 'w': motion['speed'] = 50 * m
+        case 'a':
+            motion['turn']  = 1 * m
+            motion['speed'] = 20 * m
+        case 's': motion['speed'] = -50 * m
+        case 'd':
+            motion['turn']  = -1 * m
+            motion['speed'] = 20 * m
         case _: print("UNDEFINED KEY PRESS")
 
     # Check if the motion was changed so we don't print
@@ -52,8 +56,10 @@ def handle_key(data, m = 1):
         action = "press" if m else "release"
         print(f"{timestamp} {f'[{action}]':9s} `{data}` | speed ={motion['speed']:>5.2f}  turn ={motion['turn']:>5.2f}    ")#, end='\r', flush=True)
 
-    motors.acc(motion['speed'])
-    motors.turn(motion['turn'])
+        motors.acc(motion['speed'])
+        motors.turn(motion['turn'])
+
+        socketio.emit('set-speed', motion)
 
 """
 Handle any key being released

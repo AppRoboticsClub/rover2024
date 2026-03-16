@@ -12,11 +12,12 @@ let turn = 0;
 
 let backgroundImage = new Image();
 //backgroundImage.src = "/assets/IMG_0016.jpg";
-backgroundImage.src = "/assets/tile.jpg";
+backgroundImage.src = "/static/assets/tile.jpg";
 
 socket.on('set-speed', function (data) {
 	speed = data["speed"];
 	turn = data["turn"];
+	console.log(data);
 });
 
 function clear() {
