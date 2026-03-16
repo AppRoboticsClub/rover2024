@@ -3,135 +3,120 @@ import RPi.GPIO as GPIO
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)  # use broadcom pin numbering (not board pin numbering)
 
+
 # Define pins
 pinMotorL = 13 # GPIO Pin for motorL # previously motor1
 pinMotorR = 12 # GPIO Pin for motorR # previously motor2
 pinReverseL = 5 # pin for reverse left
 pinReverseR = 6 # pin for reverse right
 
+forwardDC = 75
+backwardDC = 30
+turnStillDC = 50
 
-# setup
-# motor control pins
-GPIO.setup(pinMotorL, GPIO.OUT) # set pin motorL to output
-GPIO.setup(pinMotorR, GPIO.OUT) # set pin motorR to output
+class Motor:
+    def _setup(self):
+        GPIO.setup(self._motor_pin, GPIO.OUT)
 
-# reverse control pins
-GPIO.setup(pinReverseL, GPIO.OUT) # set pin reverseL to output
-GPIO.setup(pinReverseR, GPIO.OUT) # set pin reverseR to output
-GPIO.output(pinReverseL, False) # set so no pin output, aka go forwards
-GPIO.output(pinReverseR, False) # set so no pin output, aka go forwards
+        GPIO.setup(self._reverse_pin, GPIO.OUT)
 
-motorLServo = GPIO.PWM(pinMotorL, 1000) # set Motors to PWM. Change this depeneding on how your motor controller works
-motorLServo.start(8)
-motorRServo = GPIO.PWM(pinMotorR, 1000) # set Motors to PWM. Change this depeneding on how your motor controller works
-motorRServo.start(8)
-motorLServo.ChangeDutyCycle(0) # 
-motorRServo.ChangeDutyCycle(0) # RPI can encounter a bug that might require this to be applied twice
-dutyL = 5
-dutyR = 5
+        GPIO.output(self._reverse_pin, self._reverse)
 
-isReversed = False
-speed = 0
+        self._motor_servo = GPIO.PWM(motor_pin, starting_freq)
+        self._motor_servo.start(self._dc)
+        self._running = True
+        self._motor_servo.ChangeDutyCycle(self._dc)
 
-def turn(value):
-    global dutyL, dutyR
-    if value < 0:  # Stationary turn
-        # Both wheels spin in opposite directions
-        if value == 1:        # Rotate right
-            GPIO.output(pinReverseL, False)
-            GPIO.output(pinReverseR, True)
-        else:                 # Rotate left
-            GPIO.output(pinReverseL, True)
-            GPIO.output(pinReverseR, False)
-        motorLServo.ChangeDutyCycle(speed)
-        motorRServo.ChangeDutyCycle(speed)
-        dutyL = dutyR = speed
-    elif value > 0:  # Moving turn
-        if not isReversed:  # Forward turn
-            # The wheel on the side of the turn stops; the opposite wheel drives forward
-            GPIO.output(pinReverseL, False)
-            GPIO.output(pinReverseR, False)
-            if value == 1:  # Turn right
-                motorLServo.ChangeDutyCycle(speed)
-                motorRServo.ChangeDutyCycle(0)
-                dutyL, dutyR = speed, 0
-            else:           # Turn left
-                motorLServo.ChangeDutyCycle(0)
-                motorRServo.ChangeDutyCycle(speed)
-                dutyL, dutyR = 0, speed
-        else:               # Backwards turn
-            # The wheel on the side of the turn stops; the opposite wheel drives backward
-            if value == 1:    # Turn right
-                GPIO.output(pinReverseL, True)
-                GPIO.output(pinReverseR, False)
-                motorLServo.ChangeDutyCycle(speed)
-                motorRServo.ChangeDutyCycle(0)
-                dutyL, dutyR = speed, 0
-            else:             # Turn left
-                GPIO.output(pinReverseL, False)
-                GPIO.output(pinReverseR, True)
-                motorLServo.ChangeDutyCycle(0)
-                motorRServo.ChangeDutyCycle(speed)
-                dutyL, dutyR = 0, speed
-            
-    else:  # No turn
-        motorLServo.ChangeDutyCycle(speed)
-        motorRServo.ChangeDutyCycle(speed)
-        dutyL = dutyR = speed
+    def __init__(self, motor_pin, reverse_pin, reverse=False, starting_freq=1000, starting_dc=0, setup=True):
+        self._motor_pin = motor_pin
+        self._reverse_pin = reverse_pin
+        self._freq = starting_freq
+        self._dc = starting_dc
+        self._reverse = reverse
 
-    print(f"Turning: {l_speed} -- {r_speed} (speed={speed})(value={value})")
+        if setup:
+            self.setup()
 
-def acc(value):
-    global isReversed, speed, dutyL, dutyR
-    value = value / 5
-    if value < 0:
-        setReverse(True)
-    else:
-        setReverse(False)
-    # check for is reversed
+    def stop(self):
+        self._motor_servo.stop()
+        self._running = False
 
-    # reduce reverse speed
-    if isReversed:
-        value = value * -1
-        value = value / 5
+    def start(self):
+        self._motor_servo.start(self._dc)
+        self._running = True
 
-    # update pwm duty cycle to new value
-    print(f"Changing acc() duty cycle: {value}")
-    motorLServo.ChangeDutyCycle(value)
-    motorRServo.ChangeDutyCycle(value)
-    dutyL = value
-    dutyR = value
+    @property
+    def reverse(self):
+        return self._reverse
 
-    # update the speed
-    global speed
-    speed = value
+    @reverse.setter
+    def reverse(self, value):
+        val = bool(value)
 
-def stop():
-    motorLServo.stop()
-    motorRServo.stop()
+        if val != self._reverse:
+            self._reverse = val
+            GPIO.output(self._reverse_pin, self._reverse)
 
-def start():
-    motorLServo.start(dutyL)
-    motorRServo.start(dutyR)
+    @property
+    def dc(self):
+        return self._dc
 
-def Left(value: int):
-    motorLServo.ChangeFrequence(value)
-    # motorLServo.ChangeFrequency(value)
+    @dc.setter
+    def dc(self, value):
+        val = float(value)
 
-def Right(value: int):
-    # motorRServo.ChangeFrequence(value)
-    motorRServo.ChangeFrequency(value)
+        if val < 0 or val > 100:
+            raise ValueError("Duty cycle should be between 0.0 and 100.0")
 
-def setReverse(isRev: bool):
-    '''
-    - Takes a boolean value as a parameter as to whether the rover should be reversed, then updates
-    the reverse pins to be on if reverse is true, and off if false
-    - @param isRev: bool - The current state of the reverse button
-    '''
-    global isReversed
-#    if isReversed == isRev:
-#        return
-    isReversed = isRev
-    GPIO.output(pinReverseL, isRev)
-    GPIO.output(pinReverseR, not isRev)
+        self._dc = val
+        if self._running:
+            self._motor_serve.ChangeDutyCycle(val)
+
+    @property
+    def freq(self):
+        return self._freq
+
+    @freq.setter
+    def freq(self, value):
+        val = float(value)
+
+        if val < 50 or val > 20000:
+            raise ValueError("Frequency should be between 50Hz and 20kHz")
+       
+        self._freq = val
+        if self._running:
+            self._motor_servo.ChangeFrequency(self._freq)
+
+motorL = Motor(pinMotorL, pinReverseL)
+motorR = Motor(pinMotorR, pinReverseR)
+
+def move(straight, turn):
+    if straight < -1 or straight > 1 or turn < -1 or turn > 1:
+        raise ValueError('Invalid value')
+
+    match (straight, turn):
+        case (0,0):
+            motorL.dc = 0
+            motorR.dc = 0
+        case (0,_): # Turning while stationary
+            motorL.reverse = turn == -1
+            motorR.reverse = turn == 1
+
+            motorL.dc = turnStillDC
+            motorR.dc = turnStillDC
+        case (_,0): # Going straight
+            motorL.reverse = straight == -1
+            motorR.reverse = straight == -1
+
+            dc = reverseDC if motorL.reverse else forwardDC
+            motorL.dc = dc
+            motorR.dc = dc
+        case _: # Turning while moving
+            motorL.reverse = turn == -1
+            motorR.reverse = turn == 1
+
+            dc = forwardDC if straight == 1 else backwardDC
+
+            motorL.dc = 0 if motorL.reverse else dc
+            motorR.dc = 0 if motorR.reverse else dc
 
