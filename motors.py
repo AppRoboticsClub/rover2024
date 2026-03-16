@@ -70,7 +70,7 @@ class Motor:
 
         self._dc = val
         if self._running:
-            self._motor_serve.ChangeDutyCycle(val)
+            self._motor_servo.ChangeDutyCycle(val)
 
     @property
     def freq(self):
