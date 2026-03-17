@@ -20,18 +20,19 @@ class Motor:
 
         GPIO.setup(self._reverse_pin, GPIO.OUT)
 
-        GPIO.output(self._reverse_pin, self._reverse)
+        GPIO.output(self._reverse_pin, self._inverted ^ self._reverse)
 
         self._motor_servo = GPIO.PWM(self._motor_pin, self._freq)
         self._motor_servo.start(self._dc)
         self._running = True
         self._motor_servo.ChangeDutyCycle(self._dc)
 
-    def __init__(self, motor_pin, reverse_pin, reverse=False, starting_freq=1000, starting_dc=0, setup=True):
+    def __init__(self, motor_pin, reverse_pin, reverse=False, starting_freq=1000, starting_dc=0, inverted=False, setup=True):
         self._motor_pin = motor_pin
         self._reverse_pin = reverse_pin
         self._freq = starting_freq
         self._dc = starting_dc
+        self._inverted = inverted
         self._reverse = reverse
 
         if setup:
@@ -55,7 +56,7 @@ class Motor:
 
         if val != self._reverse:
             self._reverse = val
-            GPIO.output(self._reverse_pin, self._reverse)
+            GPIO.output(self._reverse_pin, self._inverted ^ self._reverse)
 
     @property
     def dc(self):
@@ -88,7 +89,7 @@ class Motor:
             self._motor_servo.ChangeFrequency(self._freq)
 
 motorL = Motor(pinMotorL, pinReverseL)
-motorR = Motor(pinMotorR, pinReverseR)
+motorR = Motor(pinMotorR, pinReverseR, inverted=True)
 
 def move(straight, turn):
     if straight < -1 or straight > 1 or turn < -1 or turn > 1:
