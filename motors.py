@@ -35,6 +35,8 @@ isReversed = False
 def turn(value): 
     motorLServo.ChangeDutyCycle(speed * (1 + value)) # 50 Right, 0 Neutral, -50 Left
     motorRServo.ChangeDutyCycle(speed * (1 - value))
+    print(f"R Servo (turn) set to {speed * (1+value)}")
+    print(f"L Servo (turn) set to {speed * (1-value)}")
 #    motorLServo.ChangeDutyCycle((1 + value)) # 50 Right, 0 Neutral, -50 Left
 #    motorRServo.ChangeDutyCycle((1 - value))
     dutyL = 50 + value
@@ -58,6 +60,7 @@ def acc(value):
 
     # update pwm duty cycle to new value
     motorLServo.ChangeDutyCycle(value)
+    print(f"Servos (acc) set to {value}")
     motorRServo.ChangeDutyCycle(value)
     dutyL = value
     dutyR = value
