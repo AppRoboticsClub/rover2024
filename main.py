@@ -39,9 +39,9 @@ Handle any key being pressed
 def handle_key(data, m = 1):
     prev = motion.copy()
     if data == 'w':
-        motion['speed'] = -m
-    if data == 's':
         motion['speed'] = m
+    if data == 's':
+        motion['speed'] = -m
     if data == 'a':
         motion['turn'] = -m
     if data == 'd':
